@@ -29,9 +29,10 @@
   </div>
   <div data-role="content">
     <a id="btnGo" data-role="button" href="#page1">Go!</a>
-    <div id="divLog" style="height:100px;  overflow : auto" >
     
+    <div id="divLog" style="height:100px;  overflow : auto" >
     </div>
+    
     <div data-role="fieldcontain">
       <label for="selImage">
         Select Image
@@ -42,6 +43,51 @@
         <option value="option3">zilch</option>
       </select>
     </div>
+
+    <div data-role="fieldcontain">
+      <label for="sldWalkingSpeed">
+          Walking Speed (cm/sec) <span id="expTime"> - ? sec</span>
+      </label>
+      <input id="sldWalkingSpeed" name="slider" value="120" min="20" max="500" data-highlight="false"
+      type="range">
+    </div>
+
+    <div data-role="fieldcontain">
+      <label for="sldRPS">
+          Rows per Second
+      </label>
+      <input id="sldRPS" name="slider" value="100" min="10" max="200" data-highlight="false"
+      type="range">
+    </div>
+
+    <div data-role="fieldcontain">
+      <label for="sldBrightness">
+          Brightness Correction (%)
+      </label>
+      <input id="sldBrightness" name="slider" value="100" min="1" max="200" data-highlight="false"
+      type="range">
+    </div>
+
+    <div class="ui-grid-b">
+      <div class="ui-block-a">
+          <a id="btnDefaults" data-role="button" href="#page1">
+              Defaults
+          </a>
+      </div>
+      <div class="ui-block-b">
+          <a id="btnReset" data-role="button" href="#page1">
+              Reset
+          </a>
+      </div>
+      <div class="ui-block-c">
+          <a id="btnApply" data-role="button" href="#page1">
+              Apply
+          </a>
+      </div>
+    </div>
+
+
+
   </div> <!-- end content -->
 </div> <!-- end page -->
 

@@ -23,6 +23,11 @@ var rowsDropped = 0; //count dropped Frames
 
 var app = express();
 
+var myOutputSettings = {
+  RPS : 100, //rows per second
+  walkingSpeed : 120, // cm per second
+  brightness : 100 //manipulate brightness of image
+};
 
 var myImage = {
   filename : path.join(imgDir, "rainbowsparkle.png"),
@@ -89,8 +94,9 @@ ws.on('connection', function(conn) {
 			return;
 		if (o.go) {
       		console.log("Go for gold!");
+      		var delay = Math.round(1000000/myOutputSettings.RPS) +"u"; //row delay in microseconds
       		if (myImage.imgBuffer !== null){
-        		writeFrame(myImage.imgBuffer,'10m',function(result){
+        		writeFrame(myImage.imgBuffer,delay,function(result){
           			var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
           			console.log(message);
           			wsSend({'logmessage':message});
@@ -98,7 +104,12 @@ ws.on('connection', function(conn) {
         		});
       		} // end if imgBuffer !== null
 		} else if (o.imageSelected){
-      		setMyImage(o.imageSelected);
+      		myOutputSettings = (o.imageSelected.outputSettings);
+      		setMyImage(o.imageSelected.imageName);
+
+      		console.log(o);
+    	} else if (o.setOutputSettings){
+
     	}
     }); // end conn.on('data')
 
@@ -236,9 +247,13 @@ pngparse.parseFile(myImage.filename, function(err, data) {
 */
 
 function prepareImageBuffer(callback){
+	var imageheight = 1; // 1 Meter
+	var outputtime = 100 * myImage.ratio / myOutputSettings.walkingSpeed;  // t = s/v  ( v is in cm/sec !)
+	var imageWidthPx = Math.round(myOutputSettings.RPS * outputtime);  
 gm(myImage.filename)
-  .resize(Math.round(100*myImage.ratio),numLEDs,"!")
+  .resize(imageWidthPx,numLEDs,"!")
   .rotate('black',90)
+  .modulate(myOutputSettings.brightness)
   .setFormat('PNG')
   .buffer(function(err, buf) {
      pngparse.parse(buf, function(err, data) {
@@ -261,6 +276,6 @@ gm(myImage.filename)
  */
 
  setMyImage("rainbowsparkle.png", function(){
-	writeFrame(myImage.imgBuffer,'8m');
+	//writeFrame(myImage.imgBuffer,'8m');
  });
 
