@@ -88,22 +88,19 @@ ws.on('connection', function(conn) {
 		if (!o)
 			return;
 		if (o.go) {
-      console.log("Go for gold!");
-      if (myImage.imgBuffer !== null){
-        writeFrame(myImage.imgBuffer,'10m',function(result){
-          var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
-          console.log(message);
-          wsSend({'logmessage':message});
-          wsSend({'imageBufferReady':true});
-        });
-      }
+      		console.log("Go for gold!");
+      		if (myImage.imgBuffer !== null){
+        		writeFrame(myImage.imgBuffer,'10m',function(result){
+          			var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
+          			console.log(message);
+          			wsSend({'logmessage':message});
+          			wsSend({'imageBufferReady':true});
+        		});
+      		} // end if imgBuffer !== null
 		} else if (o.imageSelected){
-      setMyImage(o.imageSelected);
-    }
-
-
-
-    });
+      		setMyImage(o.imageSelected);
+    	}
+    }); // end conn.on('data')
 
     conn.on('close', function() {
       myWsConn = null;
@@ -112,8 +109,6 @@ ws.on('connection', function(conn) {
 });
 
 ws.installHandlers(server, {prefix:'/sockjs'});
-
-
 
 var imageList = null;
 
@@ -138,11 +133,12 @@ function parseImageDir(){
 
 parseImageDir();
 
-function setMyImage(imagename){
+function setMyImage(imagename, callback){
   myImage.filename = path.join(imgDir, imagename);
   gm(myImage.filename).size(function (err, size) {
     if (err) {
-      console.log ("Errpor reading image " + myImage.filename);
+      console.log ("Error reading image " + myImage.filename);
+      throw err;
     } else {
       //console.log(size);
       //console.log(myImage);
@@ -156,12 +152,13 @@ function setMyImage(imagename){
         'imageParms' : imageParms
         }
       });
-     prepareImageBuffer();
+     prepareImageBuffer(function(){
+     	if (callback)
+			callback();
+     });
     } //end else if err
   });
 }
-
-
 
 
 var fd = fs.openSync(spiDevice, 'w');
@@ -199,12 +196,12 @@ function writeFrame(buffer,frameDelay, callback){
       myTimer.clearInterval();
       var frametime = microtime.now()-tstart;
 
-
-      callback({'frametime'     : frametime,
-                'rows'          : rows,
-                'rowsPerSecond' : Math.round(rows*100000000/frametime,2)/100,
-                'framesDropped' : framesDropped
-      });
+      if (callback)
+	      callback({'frametime'     : frametime,
+	                'rows'          : rows,
+	                'rowsPerSecond' : Math.round(rows*100000000/frametime,2)/100,
+	                'framesDropped' : framesDropped
+	      });
 //      result.frametime = microtime.now()-tstart;
 //      result.rows = rows;
 //      console.log(row+" rows in "+timeneeded+" us = "+(row*1000000/timeneeded)+" rows/s  with "+framesDropped+" dropped frames");
@@ -223,6 +220,7 @@ function writeFrame(buffer,frameDelay, callback){
 
 
 
+/* PARSE DIRECTLY FROM resized and aligned png file
 pngparse.parseFile(myImage.filename, function(err, data) {
   if(err)
     throw err
@@ -235,9 +233,9 @@ pngparse.parseFile(myImage.filename, function(err, data) {
     console.log(result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames");
   });
 });
+*/
 
-
-function prepareImageBuffer(){
+function prepareImageBuffer(callback){
 gm(myImage.filename)
   .resize(Math.round(100*myImage.ratio),numLEDs,"!")
   .rotate('black',90)
@@ -251,9 +249,18 @@ gm(myImage.filename)
          myImage.imgBuffer = Buffer.concat([data.data, blackBuffer]);
          wsSend({'logmessage' : "image buffer ready"});
          wsSend({'imageBufferReady':true});
+         if (callback)
+     	 	callback();
        }       
      });
    });
 };
 
+/* 
+ * STARTUP ANIMATION
+ */
+
+ setMyImage("rainbowsparkle.png", function(){
+	writeFrame(myImage.imgBuffer,'8m');
+ });
 
