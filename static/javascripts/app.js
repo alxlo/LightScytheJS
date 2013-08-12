@@ -1,5 +1,7 @@
 var sock;
 
+
+
 function setupSock() {
   sock = new SockJS("/sockjs");
   sock.onopen = function() {
@@ -8,10 +10,7 @@ function setupSock() {
   sock.onmessage = function(e) {
     var o = JSON.parse(e.data);
     if (o.logmessage){
-      var divLog = $("#divLog");
-      divLog.append($("<br>"));
-      divLog.append($("<code>").text(o.logmessage));
-      divLog.scrollTop(divLog.scrollTop()+10000);
+      log(o.logmessage);
       console.log('Logmessage received');
     } else if (o.updateImgList){
       console.log('Image List received', o.updateImgList);
@@ -24,6 +23,9 @@ function setupSock() {
       $('#selImage').selectmenu("refresh");
     } else if (o.imageBufferReady){
       $("#btnGo").removeClass('ui-disabled');
+    } else if (o.imageSet){
+      log("image set: width = " + Math.round(o.imageSet.imageParms.widthInMeters*100)/100 +"m");
+
     }
   };
   sock.onclose = function() {
@@ -36,6 +38,14 @@ function setupSock() {
 }
 setupSock();
 
+function log(message){
+  var divLog = $("#divLog");
+  divLog.append($("<br>"));
+  divLog.append($("<code>").text(message));
+  divLog.scrollTop(divLog.scrollTop()+10000);
+}
+
+
 function send(o) {
     if (sock)
   sock.send(JSON.stringify(o));
@@ -47,12 +57,13 @@ $(document).ready(function() {
   // bind handlers to form elements
   $("#btnGo").on("click", function() {
         $("#btnGo").addClass('ui-disabled');
-        send({go:true});
+        send({'go':true});
   //}).addClass('ui-disabled');
   });
  $("#selImage").on("change", function() {
-
-        send({go:true});
+        //alert(this.value);
+        send({'imageSelected' : this.value});
+        //send({go:true});
   //}).addClass('ui-disabled');
   });
 

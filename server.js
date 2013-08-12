@@ -23,7 +23,17 @@ var rowsDropped = 0; //count dropped Frames
 
 var app = express();
 
-var imgBuffer = null;
+
+var myImage = {
+  filename : path.join(imgDir, "rainbowsparkle.png"),
+  size : {
+    width : 1,
+    hight : 1
+  },
+  ratio : 1.0, //width:height ratio of image
+  imgBuffer : null
+};
+
 
 var blackBuffer = new Buffer(numLEDs*bytePerPixel);
 for (var i=0; i<blackBuffer.length; i++){
@@ -79,14 +89,17 @@ ws.on('connection', function(conn) {
 			return;
 		if (o.go) {
       console.log("Go for gold!");
-      writeFrame(imgBuffer,'10m',function(result){
-        var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
-        console.log(message);
-        wsSend({'logmessage':message});
-        wsSend({'imageBufferReady':true});
-
-      });
-		}
+      if (myImage.imgBuffer !== null){
+        writeFrame(myImage.imgBuffer,'10m',function(result){
+          var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
+          console.log(message);
+          wsSend({'logmessage':message});
+          wsSend({'imageBufferReady':true});
+        });
+      }
+		} else if (o.imageSelected){
+      setMyImage(o.imageSelected);
+    }
 
 
 
@@ -125,7 +138,28 @@ function parseImageDir(){
 
 parseImageDir();
 
-
+function setMyImage(imagename){
+  myImage.filename = path.join(imgDir, imagename);
+  gm(myImage.filename).size(function (err, size) {
+    if (err) {
+      console.log ("Errpor reading image " + myImage.filename);
+    } else {
+      //console.log(size);
+      //console.log(myImage);
+      myImage.size = size;
+      myImage.ratio = myImage.size.width / myImage.size.height;
+      myImage.buffer = null;
+      var imageParms = { 
+        widthInMeters : myImage.ratio * 1, // LightScyte is 1m high currently  ToDo: parametrize this
+      };
+      wsSend({ 'imageSet' : {
+        'imageParms' : imageParms
+        }
+      });
+     prepareImageBuffer();
+    } //end else if err
+  });
+}
 
 
 
@@ -189,36 +223,37 @@ function writeFrame(buffer,frameDelay, callback){
 
 
 
-pngparse.parseFile(path.join(imgDir, "rainbowsparkle.png"), function(err, data) {
+pngparse.parseFile(myImage.filename, function(err, data) {
   if(err)
     throw err
   console.log(data); 
-  imgBuffer = Buffer.concat([data.data, blackBuffer]);
+  myImage.imgBuffer = Buffer.concat([data.data, blackBuffer]);
   //append 1 black row
 
 
-  writeFrame(imgBuffer,'10m',function(result){
+  writeFrame(myImage.imgBuffer,'10m',function(result){
     console.log(result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames");
   });
 });
 
-/*gm('images/nyan-cat.png')
-  .resize(400,numLEDs,"!")
+
+function prepareImageBuffer(){
+gm(myImage.filename)
+  .resize(Math.round(100*myImage.ratio),numLEDs,"!")
   .rotate('black',90)
   .setFormat('PNG')
   .buffer(function(err, buf) {
-     console.log("buffer: "+buf.length);
      pngparse.parse(buf, function(err, data) {
-       if(err)
+       if(err) {
+         wsSend({'logmessage' : "error processing image"});
          throw err
-       console.log(data);
-       writeFrame(data.data,'10m',function(result){
-         console.log(result.rows+" rows in "+
-                     result.frametime+" us = "+
-                     result.rowsPerSecond+" rows/s  with "+
-                     result.framesDropped+" dropped frames");    
-       });
+       } else {
+         myImage.imgBuffer = Buffer.concat([data.data, blackBuffer]);
+         wsSend({'logmessage' : "image buffer ready"});
+         wsSend({'imageBufferReady':true});
+       }       
      });
    });
-*/
+};
+
 
