@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>LightScytheJS</title>
+  
+  
+  
+  <link rel="stylesheet" href="stylesheets/jquery.mobile-1.3.2.min.css">
+  
+ 
+  <!-- jQuery and jQuery Mobile -->
+  <script src="javascripts/jquery-1.9.1.min.js"></script>
+  <script src="javascripts/jquery.mobile-1.3.2.min.js"></script>
+  <!-- sockJS -->
+  <script src="javascripts/sockjs-0.3.4.min.js"></script>
+  <!-- app specific js -->
+  <script src="javascripts/app.js"></script> 
+   
+</head>
+<body>
+<!-- Home -->
+<div data-role="page" id="page1">
+  <div data-theme="a" data-role="header">
+     <h3>LightScytheJS</h3>
+  </div>
+  <div data-role="content">
+    <a id="btnGo" data-role="button" href="#page1">Go!</a>
+    <div id="divLog" style="height:100px;  overflow : auto" >
+    
+    </div>
+    <div data-role="fieldcontain">
+      <label for="selImage">
+        Select Image
+      </label>
+      <select id="selImage" name="">
+        <option value="option1">none</option>
+        <option value="option2">nill</option>
+        <option value="option3">zilch</option>
+      </select>
+    </div>
+  </div> <!-- end content -->
+</div> <!-- end page -->
+
+
+</body>
+</html>

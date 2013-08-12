@@ -1,0 +1,16 @@
+{
+  "name": "LightScytheJS",
+  "description": "A Node.js implementation of the LightScythe to be used for light paintig with LED strips.",
+  "version": "0.0.1",
+  "author": "Alexander Lorz <bigalex@gmx.de>",
+  "private": true,
+  "dependencies": {
+    "express": ">=3.3.4",
+    "sockjs": "0.3.7",
+    "microtime": "0.4.0",
+    "nanotimer": "0.2.4",
+    "pngparse": "2.0.1",
+    "gm": "1.11.0",
+    "gm-buffer": "0.0.3"
+  }
+}
