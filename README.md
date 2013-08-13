@@ -4,4 +4,7 @@ For more covenient use a web interface is provided to control the device with a 
 
 Here is a first meagre example:
 
-[Imgur](http://i.imgur.com/S3PvCP5.jpg)
+![Imgur](http://i.imgur.com/S3PvCP5.jpg)
+
+
+[![endorse](https://api.coderwall.com/alxlo/endorsecount.png)](https://coderwall.com/alxlo)
