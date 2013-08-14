@@ -1,4 +1,3 @@
-
 var fs = require('fs');
 var path = require("path");
 var express = require('express');
@@ -8,6 +7,8 @@ var nanotimer = require('nanotimer');
 var pngparse = require("pngparse");
 var gm = require("gm");
 require ("gm-buffer");
+var Resizer = require("express-resizer");
+
 
 var imgDir = __dirname + '/img';
 var spiDevice = '/dev/spidev0.0';
@@ -48,7 +49,17 @@ for (var i=0; i<blackBuffer.length; i++){
 // log requests
 app.use(express.logger('dev'));
 
+
+
+
+
+
+
+
+
+
 app.use(express.static(__dirname + '/static'));
+app.use('/img', express.static(__dirname + '/img'));
 
 app.use(app.router);
 
@@ -276,6 +287,6 @@ gm(myImage.filename)
  */
 
  setMyImage("rainbowsparkle.png", function(){
-	//writeFrame(myImage.imgBuffer,'8m');
+	writeFrame(myImage.imgBuffer,'8m');
  });
 

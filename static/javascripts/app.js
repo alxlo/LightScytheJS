@@ -25,13 +25,17 @@ function setupSock() {
       console.log('Image List received', o.updateImgList);
       var selbox=$('#selImage');
       selbox.empty();
+      $('#myimages').empty();
+
       //selbox.append($("<option>"), { value: null, html: 'Choose one' });
       $.each(o.updateImgList , function(i, v){ 
         selbox.append($("<option>", { value: v, html: v }));
+        $('#myimages').append($("<img>", {src: 'img/'+v, width: '100%'}));
+        $('#myimages').append($("<p>").text(v));
       });
       $('#selImage').selectmenu("refresh");
     } else if (o.imageBufferReady){
-      $("#btnGo").removeClass('ui-disabled');48
+      $("#btnGo").removeClass('ui-disabled');
     } else if (o.imageSet){
       log("image set: width = " + Math.round(o.imageSet.imageParms.widthInMeters*100)/100 +"m");
       imgWidthInMeters = o.imageSet.imageParms.widthInMeters;
@@ -75,8 +79,8 @@ $(document).ready(function() {
   $("#btnGo").on("click", function() {
         $("#btnGo").addClass('ui-disabled');
         send({'go':true});
-  //}).addClass('ui-disabled');
-  });
+  }).addClass('ui-disabled');
+  
 
  $("#selImage").on("change", function() {
         //alert(this.value);
@@ -84,6 +88,7 @@ $(document).ready(function() {
           'imageName' : $("#selImage").val(),
           'outputSettings' : myOutputSettings
         }});
+        $("#btnGo").addClass('ui-disabled');
         //send({go:true});
   //}).addClass('ui-disabled');
   });
@@ -125,6 +130,7 @@ $(document).ready(function() {
       'imageName' : $("#selImage").val(),
       'outputSettings' : myOutputSettings
     }});
+    $("#btnGo").addClass('ui-disabled');
   //}).addClass('ui-disabled');
   });  
 
