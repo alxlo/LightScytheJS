@@ -73,24 +73,37 @@ console.log('lisitening on 3000');
 
 var ws = sockjs.createServer();
 
-var myWsConn = null;
+var myWsConns = {};
+
 
 function wsSend(o) {
-  if (myWsConn!==null) {
-    try {
-      myWsConn.write(JSON.stringify(o));
-    } catch (e) {
-        console.error("Error sending to client:", e);
-    }
-  }
+	for(var id in myWsConns){
+	  	try {
+      		myWsConns[id].send(o);
+    	} catch (e) {
+        	console.error("Error sending to client " + id, e);
+    	}
+	}	
+
 } // end wsSend
 
 
 ws.on('connection', function(conn) {
 
-    myWsConn = conn;
+    function send(o) {
+		conn.write(JSON.stringify(o));
+    };
+
+    var id, n = 10000;
+    do {
+	id = Math.floor(n * Math.random());
+	n *= 10;
+    } while (myWsConns.hasOwnProperty(id));
+    	myWsConns[id] = { conn: conn, send: send };
+    	console.log("new client, setting id to " + id);
+
     if (imageList!==null)
-        wsSend({'updateImgList' : Object.keys(imageList)});
+        send({'updateImgList' : Object.keys(imageList)});
 
 
     conn.on('data', function(message) {
@@ -126,8 +139,8 @@ ws.on('connection', function(conn) {
     }); // end conn.on('data')
 
     conn.on('close', function() {
-      myWsConn = null;
-      console.log('Client closed connection.');
+      delete myWsConns[id];
+      console.log('Client ' + id + 'closed connection.');
     });
 });
 
@@ -196,18 +209,22 @@ function isReady(){
 
 
 function colorFill(color){ // hexstring #RRGGBB
-	var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color),
-     	r = parseInt(result[1], 16),
-        g = parseInt(result[2], 16),
-        b = parseInt(result[3], 16);
-    var buffer = new Buffer(numLEDs*3); //should require 2s when writting with 500.000 baud
-	for (var i=0; i<buffer.length; i+=3){
-	  buffer[i]=r;
-	  buffer[i+1]=g;
-	  buffer[i+2]=b;
-	};
-   console.log("Filling with color "+color);
-   writeRow(0,buffer);
+	var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
+    try  {
+    	var	r = parseInt(result[1], 16),
+        	g = parseInt(result[2], 16),
+        	b = parseInt(result[3], 16);
+    	var buffer = new Buffer(numLEDs*3); //should require 2s when writting with 500.000 baud
+		for (var i=0; i<buffer.length; i+=3){
+		  buffer[i]=r;
+		  buffer[i+1]=g;
+		  buffer[i+2]=b;
+		};
+	   	console.log("Filling with color "+color);
+   		writeRow(0,buffer);
+   	} catch (e) {
+   		console.error("Problem setting color",e);
+   	}
 };
 
 
