@@ -119,7 +119,8 @@ ws.on('connection', function(conn) {
       		setMyImage(o.imageSelected.imageName);
 
       		console.log(o);
-    	} else if (o.setOutputSettings){
+    	} else if (o.colorFill){
+    		colorFill(o.colorFill);
 
     	}
     }); // end conn.on('data')
@@ -192,6 +193,25 @@ function isReady(){
   return microtime.now() > (lastWriteTime + rowResetTime);
 }
 
+
+
+function colorFill(color){ // hexstring #RRGGBB
+	var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color),
+     	r = parseInt(result[1], 16),
+        g = parseInt(result[2], 16),
+        b = parseInt(result[3], 16);
+    var buffer = new Buffer(numLEDs*3); //should require 2s when writting with 500.000 baud
+	for (var i=0; i<buffer.length; i+=3){
+	  buffer[i]=r;
+	  buffer[i+1]=g;
+	  buffer[i+2]=b;
+	};
+   console.log("Filling with color "+color);
+   writeRow(0,buffer);
+};
+
+
+
 /*
  * write a row with RGB values to the strip
  */
@@ -205,6 +225,7 @@ function writeRow(row, buffer){
   console.log('LED strip not ready, frame dropped: '+row);
   return false;
 }
+
 
 
 function writeFrame(buffer,frameDelay, callback){
@@ -287,6 +308,8 @@ gm(myImage.filename)
  */
 
  setMyImage("rainbowsparkle.png", function(){
-	writeFrame(myImage.imgBuffer,'8m');
+	writeFrame(myImage.imgBuffer,'8m', function(){
+		colorFill("#000000");
+	});
  });
 

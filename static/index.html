@@ -17,6 +17,8 @@
   <script src="javascripts/jquery.mobile-1.3.2.min.js"></script>
   <!-- sockJS -->
   <script src="javascripts/sockjs-0.3.4.min.js"></script>
+  <!-- color picker -->
+  <<script src="jscolor/jscolor.js"></script>
   <!-- app specific js -->
   <script src="javascripts/app.js"></script> 
    
@@ -68,7 +70,7 @@
       type="range">
     </div>
 
-    <div class="ui-grid-b">
+    <div class="ui-grid-b">javascript hex color to rgb
       <div class="ui-block-a">
           <a id="btnDefaults" data-role="button" href="#page1">
               Defaults
@@ -86,7 +88,11 @@
       </div>
     </div>
 
-    <p>View <a href="#page2">images</a></p>
+    <p>
+      <a href="#page2">View images</a>
+      <a id='lnkFlashlightOn' href="#flashlight">Flashlight</a>
+
+    </p>
 
   </div> <!-- end content -->
 </div> <!-- end page -->
@@ -112,6 +118,32 @@
     <h4>Page Footer</h4>
   </div><!-- /footer -->
 </div><!-- /page -->
+
+
+<div data-role="page" id="flashlight">
+
+  <div data-role="header">
+    <h1>Flashlight</h1>
+  </div><!-- /header -->
+
+  <div data-role="content">
+  <a id="btnFlashlightOff" data-role="button" href="#page1">Off</a>
+  
+    <input id="colorpicker" type="text"
+           style="width: 100%;" class="color" value="101010"> 
+      
+    <p>
+
+
+
+  </div><!-- /content -->
+
+<div data-role="footer">
+    <h4>Page Footer</h4>
+  </div><!-- /footer -->
+</div><!-- /page -->
+
+
 
 </body>
 </html>

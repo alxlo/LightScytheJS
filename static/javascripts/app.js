@@ -8,6 +8,8 @@ var defaultOutputSettings = {
 
 var imgWidthInMeters = 1;
 
+var myFlashlightColor = "#101010";
+
 var myOutputSettings = jQuery.extend(true,{},defaultOutputSettings); //deep copy (=clone)
 
 
@@ -133,6 +135,27 @@ $(document).ready(function() {
     $("#btnGo").addClass('ui-disabled');
   //}).addClass('ui-disabled');
   });  
+
+
+  $("#lnkFlashlightOn").on("click", function() {
+    send({'colorFill': myFlashlightColor});
+  });
+
+  $("#btnFlashlightOff").on("click", function() {
+    send({'colorFill': "#000000"});
+  });
+
+
+  var colorpicker = $('#colorpicker');
+  colorpicker.on('input', function() {
+    send({ 'colorFill': colorpicker.val() });
+    myFlashlightColor = colorpicker.val();
+    });
+  colorpicker.on('change', function() {
+    myFlashlightColor = colorpicker.val();
+    send({ 'colorFill': colorpicker.val() });
+    });
+
 
 });  // end document.ready
 
