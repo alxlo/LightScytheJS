@@ -2,7 +2,7 @@ This is a pure node.js implementation for a lightpainting tool inspired by the a
 
 For more covenient use a web interface is provided to control the device with a smartphone.
 
-Here is a first meagre example:
+Here is a first meager example:
 
 ![Imgur](http://i.imgur.com/S3PvCP5.jpg)
 
