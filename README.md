@@ -4,13 +4,12 @@ For more covenient use a web interface is provided to control the device with a 
 
 The hardware consists of a cubieboard (raspberry Pi should work as well), a ws2801 LED strip and an USB wifi dongle.
 
-![LightScytheJS Hardware](https://github.com/alxlo/LightScytheJS/raw/master/docimg/hardware1.jpg)
+![LightScytheJS Hardware](https://github.com/alxlo/LightScytheJS/raw/master/docimages/hardware1.jpg)
 
-![LightScytheJS Hardware](https://github.com/alxlo/LightScytheJS/raw/master/docimg/hardware2.jpg)
+![LightScytheJS Hardware](https://github.com/alxlo/LightScytheJS/raw/master/docimages/hardware2.jpg)
 
 
-
-Here is a first meager example:
+Here is a first meager example, more to follow.
 
 ![Imgur](http://i.imgur.com/S3PvCP5.jpg)
 
