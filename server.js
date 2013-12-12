@@ -1,3 +1,7 @@
+/************************************************************
+ * imports
+ */
+
 var fs = require('fs');
 var path = require("path");
 var express = require('express');
@@ -7,13 +11,21 @@ var nanotimer = require('nanotimer');
 var pngparse = require("pngparse");
 var gm = require("gm");
 require ("gm-buffer");
-var Resizer = require("express-resizer");
+var myLedStripe = require('ledstripe');
 
+/***********************************************************
+ * settings
+ */
 
 var imgDir = __dirname + '/img';
-var spiDevice = '/dev/spidev0.0';
+var mySPI = '/dev/spidev0.0';
 var numLEDs = 32; 
 var bytePerPixel = 3; //RGB
+
+
+/*************************************************************
+ * init variables
+ */
 
 var rowResetTime = 1000; // number of us CLK has to be pulled low (=no writes) for frame reset
          // manual of WS2801 says 500 is enough, however we need at least 1000
@@ -40,41 +52,41 @@ var myImage = {
   imgBuffer : null
 };
 
-
+// just a black buffer
 var blackBuffer = new Buffer(numLEDs*bytePerPixel);
 for (var i=0; i<blackBuffer.length; i++){
   blackBuffer[i]=0;
 };
 
-// log requests
-app.use(express.logger('dev'));
 
 
+/*************************************************************
+ * connect to LED stripe
+ */
+
+myLedStripe.connect(numLEDs, 'WS2801', mySPI);
+// signal startup with blue light
+myLedStripe.fill(0x00, 0x00, 0x20);
 
 
+/*************************************************************
+ * startup webserver
+ */
 
-
-
-
-
-
+app.use(express.logger('dev'));  // log requests
 app.use(express.static(__dirname + '/static'));
 app.use('/img', express.static(__dirname + '/img'));
-
 app.use(app.router);
-
 var server = app.listen(3000);
 console.log('lisitening on 3000');
 
 
-/*
+/*************************************************************
  * websockets setup
  */
 
 var ws = sockjs.createServer();
-
 var myWsConns = {};
-
 
 function wsSend(o) {
 	for(var id in myWsConns){
@@ -120,8 +132,9 @@ ws.on('connection', function(conn) {
       		console.log("Go for gold!");
       		var delay = Math.round(1000000/myOutputSettings.RPS) +"u"; //row delay in microseconds
       		if (myImage.imgBuffer !== null){
-        		writeFrame(myImage.imgBuffer,delay,function(result){
-          			var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
+        		myLedStripe.animate(myImage.imgBuffer,delay,function(result){
+                var message = "TODO: Animation stats";
+          			//var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
           			console.log(message);
           			wsSend({'logmessage':message});
           			wsSend({'imageBufferReady':true});
@@ -197,15 +210,15 @@ function setMyImage(imagename, callback){
 }
 
 
-var fd = fs.openSync(spiDevice, 'w');
-var isBusy = false;
+//var fd = fs.openSync(spiDevice, 'w');
+//var isBusy = false;
 
-var lastWriteTime = microtime.now()-rowResetTime-1;
+//var lastWriteTime = microtime.now()-rowResetTime-1;
 
-function isReady(){
+/*function isReady(){
   return microtime.now() > (lastWriteTime + rowResetTime);
 }
-
+*/
 
 
 function colorFill(color){ // hexstring #RRGGBB
@@ -214,14 +227,8 @@ function colorFill(color){ // hexstring #RRGGBB
     	var	r = parseInt(result[1], 16),
         	g = parseInt(result[2], 16),
         	b = parseInt(result[3], 16);
-    	var buffer = new Buffer(numLEDs*3); //should require 2s when writting with 500.000 baud
-		for (var i=0; i<buffer.length; i+=3){
-		  buffer[i]=r;
-		  buffer[i+1]=g;
-		  buffer[i+2]=b;
-		};
+      myLedStripe.fill(r,g,b);
 	   	console.log("Filling with color "+color);
-   		writeRow(0,buffer);
    	} catch (e) {
    		console.error("Problem setting color",e);
    	}
@@ -233,49 +240,47 @@ function colorFill(color){ // hexstring #RRGGBB
  * write a row with RGB values to the strip
  */
 
-function writeRow(row, buffer){
-  if (isReady()){
-    fs.writeSync(fd, buffer, row*numLEDs*bytePerPixel, numLEDs*bytePerPixel, null);
-    lastWriteTime = microtime.now();
-    return true;
-  }
-  console.log('LED strip not ready, frame dropped: '+row);
-  return false;
-}
+// function writeRow(row, buffer){
+//   if (isReady()){
+//     fs.writeSync(fd, buffer, row*numLEDs*bytePerPixel, numLEDs*bytePerPixel, null);
+//     lastWriteTime = microtime.now();
+//     return true;
+//   }
+//   console.log('LED strip not ready, frame dropped: '+row);
+//   return false;
+// }
 
 
 
-function writeFrame(buffer,frameDelay, callback){
-  var row = 0;
-  var framesDropped = 0;
-  var rows = buffer.length/(numLEDs*bytePerPixel);
-  var myTimer = new nanotimer();
-  var tstart = microtime.now();
-  myTimer.setInterval(function(){
-    if (row>=rows){
-      myTimer.clearInterval();
-      var frametime = microtime.now()-tstart;
+// function writeFrame(buffer,frameDelay, callback){
 
-      if (callback)
-	      callback({'frametime'     : frametime,
-	                'rows'          : rows,
-	                'rowsPerSecond' : Math.round(rows*100000000/frametime,2)/100,
-	                'framesDropped' : framesDropped
-	      });
-//      result.frametime = microtime.now()-tstart;
-//      result.rows = rows;
-//      console.log(row+" rows in "+timeneeded+" us = "+(row*1000000/timeneeded)+" rows/s  with "+framesDropped+" dropped frames");
-    } else {
-      //console.log("write row "+row);
-      framesDropped += !writeRow(row,buffer);
-      row++;
-    }
-    }, frameDelay, function(err) {
-      if(err) {
-         //error
-      }
-  });
-} //end writeFrame
+//   var row = 0;
+//   var framesDropped = 0;
+//   var rows = buffer.length/(numLEDs*bytePerPixel);
+//   var myTimer = new nanotimer();
+//   var tstart = microtime.now();
+//   myTimer.setInterval(function(){
+//     if (row>=rows){
+//       myTimer.clearInterval();
+//       var frametime = microtime.now()-tstart;
+
+//       if (callback)
+// 	      callback({'frametime'     : frametime,
+// 	                'rows'          : rows,
+// 	                'rowsPerSecond' : Math.round(rows*100000000/frametime,2)/100,
+// 	                'framesDropped' : framesDropped
+// 	      });
+//     } else {
+//       //console.log("write row "+row);
+//       framesDropped += !writeRow(row,buffer);
+//       row++;
+//     }
+//     }, frameDelay, function(err) {
+//       if(err) {
+//          //error
+//       }
+//   });
+// } //end writeFrame
 
 
 
@@ -325,8 +330,8 @@ gm(myImage.filename)
  */
 
  setMyImage("rainbowsparkle.png", function(){
-	writeFrame(myImage.imgBuffer,'8m', function(){
-		colorFill("#000000");
+  myLedStripe.animate(myImage.imgBuffer,'8m', function(){
+		colorFill("#200000");
 	});
  });
 

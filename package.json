@@ -10,6 +10,7 @@
     "microtime": "0.4.0",
     "nanotimer": "0.2.4",
     "pngparse": "2.0.1",
+    "ledstripe": "0.0.x",
     "gm": "1.11.0",
     "gm-buffer": "0.0.3"
   }
