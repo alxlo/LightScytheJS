@@ -21,6 +21,7 @@ var imgDir = __dirname + '/img';
 var mySPI = '/dev/spidev0.0';
 var numLEDs = 32; 
 var bytePerPixel = 3; //RGB
+var httpPort = 80; //the port the server will listen on, use 3000 if 80 will not work
 
 
 /*************************************************************
@@ -77,8 +78,8 @@ app.use(express.logger('dev'));  // log requests
 app.use(express.static(__dirname + '/static'));
 app.use('/img', express.static(__dirname + '/img'));
 app.use(app.router);
-var server = app.listen(3000);
-console.log('lisitening on 3000');
+var server = app.listen(httpPort);
+console.log('listening on port' +  httpPort);
 
 
 /*************************************************************
