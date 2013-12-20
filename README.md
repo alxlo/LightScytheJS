@@ -38,4 +38,9 @@ We use setcap:
     sudo setcap 'cap_net_bind_service=+ep' `which node`
 
 
+GPIO ports in user mode
+-----------------------
+
+If the node process runs as non-root (recommended), the GPIO pins have to be exported prior to starting the process:
+    sudo su -c 'echo 1 > /sys/class/gpio/export;echo 2 > /sys/class/gpio/export'
 

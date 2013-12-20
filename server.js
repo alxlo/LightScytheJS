@@ -12,6 +12,7 @@ var pngparse = require("pngparse");
 var gm = require("gm");
 require ("gm-buffer");
 var myLedStripe = require('ledstripe');
+var Gpio = require('onoff').Gpio;
 
 /***********************************************************
  * settings
@@ -22,6 +23,7 @@ var mySPI = '/dev/spidev0.0';
 var numLEDs = 32; 
 var bytePerPixel = 3; //RGB
 var httpPort = 80; //the port the server will listen on, use 3000 if 80 will not work
+var myFlashlightColor = "#303030";
 
 
 /*************************************************************
@@ -42,6 +44,11 @@ var myOutputSettings = {
   walkingSpeed : 120, // cm per second
   brightness : 100 //manipulate brightness of image
 };
+
+var btnGoLast = 1;    //last value of hardware go button
+var btnLightLast = 1; //last value of hardware light button
+var btnGo = new Gpio(1, 'in', 'both');
+var btnLight = new Gpio(2, 'in', 'both');
 
 var myImage = {
   filename : path.join(imgDir, "rainbowsparkle.png"),
@@ -147,7 +154,8 @@ ws.on('connection', function(conn) {
 
       		console.log(o);
     	} else if (o.colorFill){
-    		colorFill(o.colorFill);
+        colorFill(o.colorFill);
+        myFlashlightColor = (o.colorFill == '#000000') ? myFlashlightColor : o.colorFill;
 
     	}
     }); // end conn.on('data')
@@ -325,6 +333,46 @@ gm(myImage.filename)
      });
    });
 };
+
+function btnPoll(){
+    //poll for changes of hardware buttons, emit events
+    btnGo.read(function(err, value) { // Asynchronous read.
+        if (err) console.error("error reading go button", err);
+        if (value !== btnGoLast){
+          btnGoLast = value;
+          if (btnGoLast == 0) {
+            colorFill(myFlashlightColor);
+          } else {
+            colorFill("#004000");
+          }
+
+        }
+    });
+
+}
+
+
+// graceful exit (not necessary but we will play nice)
+function gracefulExit() {
+  console.log( "Exiting gracefully on SIGINT or SIGTERM" )
+  // TODO close websocket connections
+  // TODO  shutdown sockjs server  
+  // shutdown express
+  server.close();  
+  // switching all leds off 
+  myLedStripe.fill(0x00, 0x00, 0x00);
+  // close conection to SPI
+  myLedStripe.disconnect();
+  process.exit( )
+}
+
+// shutdown on CTRL-C and SIGTERM
+process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit)
+
+
+// polling buttons every 10ms
+setInterval(btnPoll, 10);
+
 
 /* 
  * STARTUP ANIMATION

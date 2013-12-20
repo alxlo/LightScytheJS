@@ -8,7 +8,7 @@ var defaultOutputSettings = {
 
 var imgWidthInMeters = 1;
 
-var myFlashlightColor = "#101010";
+var myFlashlightColor = "#303030";
 
 var myOutputSettings = jQuery.extend(true,{},defaultOutputSettings); //deep copy (=clone)
 
