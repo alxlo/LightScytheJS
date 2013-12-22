@@ -10,6 +10,7 @@
   
   
   <link rel="stylesheet" href="stylesheets/jquery.mobile-1.3.2.min.css">
+  <link rel="stylesheet" href="stylesheets/lightscythe.css">
   
  
   <!-- jQuery and jQuery Mobile -->
@@ -18,7 +19,7 @@
   <!-- sockJS -->
   <script src="javascripts/sockjs-0.3.4.min.js"></script>
   <!-- color picker -->
-  <<script src="jscolor/jscolor.js"></script>
+  <script src="jscolor/jscolor.js"></script>
   <!-- app specific js -->
   <script src="javascripts/app.js"></script> 
    
@@ -70,10 +71,10 @@
       type="range">
     </div>
 
-    <div class="ui-grid-b">javascript hex color to rgb
+    <div class="ui-grid-b">
       <div class="ui-block-a">
           <a id="btnDefaults" data-role="button" href="#page1">
-              Defaults
+              Default
           </a>
       </div>
       <div class="ui-block-b">
@@ -88,11 +89,24 @@
       </div>
     </div>
 
-    <p>
-      <a href="#page2">View images</a>
-      <a id='lnkFlashlightOn' href="#flashlight">Flashlight</a>
+    <div class="ui-grid-b">
+      <div class="ui-block-a">
+          <a id="btnSetImage" data-role="button" href="#page2">
+            Image
+          </a>
+      </div>
+      <div class="ui-block-b">
+          <a id="lnkFlashlightOn" data-role="button" href="#flashlight">
+              Light
+          </a>
+      </div>
+      <div class="ui-block-c">
+          <a id="btnBlankScreen" data-role="button" href="#blankpage">
+              Blank
+          </a>
+      </div>
+    </div>
 
-    </p>
 
   </div> <!-- end content -->
 </div> <!-- end page -->
@@ -119,7 +133,6 @@
   </div><!-- /footer -->
 </div><!-- /page -->
 
-
 <div data-role="page" id="flashlight">
 
   <div data-role="header">
@@ -133,15 +146,31 @@
            style="width: 100%;" class="color" value="101010"> 
       
     <p>
-
-
-
   </div><!-- /content -->
 
 <div data-role="footer">
     <h4>Page Footer</h4>
   </div><!-- /footer -->
 </div><!-- /page -->
+
+
+<div data-role="page" id="blankpage">
+
+  <div data-role="content">
+  <a id="btnUnblank" data-role="button" href="#page1">Unblank</a>
+
+
+  </div><!-- /content -->
+
+</div><!-- /page -->
+
+
+
+
+
+
+
+
 
 
 

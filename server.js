@@ -371,6 +371,7 @@ function btnPoll(){
             colorFill(myFlashlightColor);
           } else {
             colorFill("#000000");
+            wsSend({'toggleBlank' : true});
           }
 
         }

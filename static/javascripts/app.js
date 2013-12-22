@@ -12,6 +12,7 @@ var myFlashlightColor = "#303030";
 
 var myOutputSettings = jQuery.extend(true,{},defaultOutputSettings); //deep copy (=clone)
 
+var lastPageName = "page1"; //for toggling between blank page and other pages
 
 function setupSock() {
   sock = new SockJS("/sockjs");
@@ -47,6 +48,8 @@ function setupSock() {
       imgWidthInMeters = o.imageSet.imageParms.widthInMeters;
       updateExposureTime();
 
+    } else if (o.toggleBlank){
+      toggleBlank();
     }
   };
   sock.onclose = function() {
@@ -77,6 +80,16 @@ function updateExposureTime(){
   $("#expTime").text("- "+time+" sec");
 }
 
+function toggleBlank(){
+  //toggles between the blank page and the current page
+  var currentPage = $(".ui-page-active").attr("id");
+  if (currentPage == "blankpage") {
+    $.mobile.changePage("#"+lastPageName);
+  } else {
+    lastPageName = currentPage;
+    $.mobile.changePage("#blankpage");
+  }
+}
 
 $(document).ready(function() {
   console.log('document.ready');
@@ -148,6 +161,7 @@ $(document).ready(function() {
   $("#btnFlashlightOff").on("click", function() {
     send({'colorFill': "#000000"});
   });
+
 
 
   var colorpicker = $('#colorpicker');
