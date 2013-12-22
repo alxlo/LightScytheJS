@@ -36,8 +36,12 @@ function setupSock() {
         $('#myimages').append($("<p>").text(v));
       });
       $('#selImage').selectmenu("refresh");
-    } else if (o.imageBufferReady){
-      $("#btnGo").removeClass('ui-disabled');
+    } else if (o.hasOwnProperty('deviceReady')){
+          if(o.deviceReady){
+              $("#btnGo").removeClass('ui-disabled')
+          } else {
+              $("#btnGo").addClass('ui-disabled');
+          } //end if device ready
     } else if (o.imageSet){
       log("image set: width = " + Math.round(o.imageSet.imageParms.widthInMeters*100)/100 +"m");
       imgWidthInMeters = o.imageSet.imageParms.widthInMeters;

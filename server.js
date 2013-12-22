@@ -26,6 +26,7 @@ var httpPort = 80; //the port the server will listen on, use 3000 if 80 will not
 var myFlashlightColor = "#303030";
 
 
+
 /*************************************************************
  * init variables
  */
@@ -39,6 +40,8 @@ var rowsDropped = 0; //count dropped Frames
 
 var app = express();
 
+var deviceReady = false; // without an image buffer we are not ready
+
 var myOutputSettings = {
   RPS : 100, //rows per second
   walkingSpeed : 120, // cm per second
@@ -47,8 +50,8 @@ var myOutputSettings = {
 
 var btnGoLast = 1;    //last value of hardware go button
 var btnLightLast = 1; //last value of hardware light button
-var btnGo = new Gpio(1, 'in', 'both');
-var btnLight = new Gpio(2, 'in', 'both');
+var btnGo = new Gpio(2, 'in', 'both');
+var btnLight = new Gpio(1, 'in', 'both');
 
 var myImage = {
   filename : path.join(imgDir, "rainbowsparkle.png"),
@@ -137,17 +140,7 @@ ws.on('connection', function(conn) {
 		if (!o)
 			return;
 		if (o.go) {
-      		console.log("Go for gold!");
-      		var delay = Math.round(1000000/myOutputSettings.RPS) +"u"; //row delay in microseconds
-      		if (myImage.imgBuffer !== null){
-        		myLedStripe.animate(myImage.imgBuffer,delay,function(result){
-                var message = "TODO: Animation stats";
-          			//var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
-          			console.log(message);
-          			wsSend({'logmessage':message});
-          			wsSend({'imageBufferReady':true});
-        		});
-      		} // end if imgBuffer !== null
+        doLightpainting();
 		} else if (o.imageSelected){
       		myOutputSettings = (o.imageSelected.outputSettings);
       		setMyImage(o.imageSelected.imageName);
@@ -312,27 +305,53 @@ pngparse.parseFile(myImage.filename, function(err, data) {
 function prepareImageBuffer(callback){
 	var imageheight = 1; // 1 Meter
 	var outputtime = 100 * myImage.ratio / myOutputSettings.walkingSpeed;  // t = s/v  ( v is in cm/sec !)
-	var imageWidthPx = Math.round(myOutputSettings.RPS * outputtime);  
-gm(myImage.filename)
-  .resize(imageWidthPx,numLEDs,"!")
-  .rotate('black',90)
-  .modulate(myOutputSettings.brightness)
-  .setFormat('PNG')
-  .buffer(function(err, buf) {
-     pngparse.parse(buf, function(err, data) {
-       if(err) {
-         wsSend({'logmessage' : "error processing image"});
-         throw err
-       } else {
-         myImage.imgBuffer = Buffer.concat([data.data, blackBuffer]);
-         wsSend({'logmessage' : "image buffer ready"});
-         wsSend({'imageBufferReady':true});
-         if (callback)
-     	 	callback();
-       }       
-     });
-   });
+	var imageWidthPx = Math.round(myOutputSettings.RPS * outputtime); 
+  deviceReady = false;
+  gm(myImage.filename)
+    .resize(imageWidthPx,numLEDs,"!")
+    .rotate('black',90)
+    .modulate(myOutputSettings.brightness)
+    .setFormat('PNG')
+    .buffer(function(err, buf) {
+        pngparse.parse(buf, function(err, data) {
+          if(err) {
+            wsSend({'logmessage' : "error processing image"});
+            throw err
+          } else {
+            myImage.imgBuffer = Buffer.concat([data.data, blackBuffer]);
+            wsSend({'logmessage' : "image buffer ready"});
+            deviceReady = true;
+            wsSend({'deviceReady': deviceReady});
+            if (callback)
+       	 	    callback();
+          } //end if err      
+        }); // pngparse
+    }); //bufer
 };
+
+
+function doLightpainting(){
+    console.log("Go for gold!");
+    var delay = Math.round(1000000/myOutputSettings.RPS) +"u"; //row delay in microseconds
+    if (myImage.imgBuffer !== null && deviceReady){
+        deviceReady = false;
+        //stop btn poll timer 
+        clearInterval(myBtnPollTimer);
+        wsSend({'deviceReady':deviceReady});
+        myLedStripe.animate(myImage.imgBuffer,delay,function(result){
+            //what to do when finished
+            var message = "TODO: Animation stats";
+            //var message =  result.rows+" rows in "+result.frametime+" us = "+result.rowsPerSecond+" rows/s  with "+result.framesDropped+" dropped frames";
+            console.log(message);
+            wsSend({'logmessage':message});
+            deviceReady = true;
+            wsSend({'deviceReady':deviceReady});
+            //re-enablebutton poll timer
+            myBtnPollTimer = setInterval(btnPoll, 10);
+        });
+    } // end if imgBuffer !== null
+}
+
 
 function btnPoll(){
     //poll for changes of hardware buttons, emit events
@@ -340,10 +359,18 @@ function btnPoll(){
         if (err) console.error("error reading go button", err);
         if (value !== btnGoLast){
           btnGoLast = value;
-          if (btnGoLast == 0) {
+          if (btnGoLast == 0)
+            doLightpainting();
+        }
+    });
+    btnLight.read(function(err, value) { // Asynchronous read.
+        if (err) console.error("error reading light button", err);
+        if (value !== btnLightLast){
+          btnLightLast = value;
+          if (btnLightLast == 0) {
             colorFill(myFlashlightColor);
           } else {
-            colorFill("#004000");
+            colorFill("#000000");
           }
 
         }
@@ -371,7 +398,7 @@ process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit)
 
 
 // polling buttons every 10ms
-setInterval(btnPoll, 10);
+var myBtnPollTimer = setInterval(btnPoll, 10);
 
 
 /* 
