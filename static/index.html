@@ -36,16 +36,7 @@
     <div id="divLog" style="height:100px;  overflow : auto" >
     </div>
     
-    <div data-role="fieldcontain">
-      <label for="selImage">
-        Select Image
-      </label>
-      <select id="selImage" name="">
-        <option value="option1">none</option>
-        <option value="option2">nill</option>
-        <option value="option3">zilch</option>
-      </select>
-    </div>
+
 
     <div data-role="fieldcontain">
       <label for="sldWalkingSpeed">
@@ -106,7 +97,8 @@
           </a>
       </div>
     </div>
-
+    
+    <img id="currentImage" width="100%" src="img/default.png" />
 
   </div> <!-- end content -->
 </div> <!-- end page -->
@@ -117,15 +109,15 @@
 <div data-role="page" id="page2">
 
   <div data-role="header">
-    <h1>Bar</h1>
+    <h1>Select Image</h1>
   </div><!-- /header -->
 
   <div data-role="content">
-    <p>Available images</p>
-    <p><a href="#page1">Back</a></p>
+    <a id="btnGo" data-role="button" href="#page1">Back</a>
     <div id="myimages">
 
     </div>
+    <a id="btnGo" data-role="button" href="#page1">Back</a>
   </div><!-- /content -->
 
 <div data-role="footer">

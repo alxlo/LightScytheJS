@@ -8,11 +8,13 @@ var defaultOutputSettings = {
 
 var imgWidthInMeters = 1;
 
-var myFlashlightColor = "#303030";
+var myFlashlightColor = "#603030";
 
 var myOutputSettings = jQuery.extend(true,{},defaultOutputSettings); //deep copy (=clone)
 
 var lastPageName = "page1"; //for toggling between blank page and other pages
+
+var currentImage ="defaultimg.png"
 
 function setupSock() {
   sock = new SockJS("/sockjs");
@@ -26,17 +28,22 @@ function setupSock() {
       console.log('Logmessage received');
     } else if (o.updateImgList){
       console.log('Image List received', o.updateImgList);
-      var selbox=$('#selImage');
-      selbox.empty();
-      $('#myimages').empty();
 
+      $('#myimages').empty();
       //selbox.append($("<option>"), { value: null, html: 'Choose one' });
       $.each(o.updateImgList , function(i, v){ 
-        selbox.append($("<option>", { value: v, html: v }));
-        $('#myimages').append($("<img>", {src: 'img/'+v, width: '100%'}));
-        $('#myimages').append($("<p>").text(v));
+        var linkitem = $("<a>", {
+              href : "#page1",
+              onclick : "setImage('"+v+"')"
+            }).text(v);
+
+        linkitem.append($("<img>", {
+                  src: 'img/'+v,
+                  width: '100%'
+
+            }));
+        $('#myimages').append(linkitem);
       });
-      $('#selImage').selectmenu("refresh");
     } else if (o.hasOwnProperty('deviceReady')){
           if(o.deviceReady){
               $("#btnGo").removeClass('ui-disabled')
@@ -91,6 +98,19 @@ function toggleBlank(){
   }
 }
 
+function setImage(imageName){
+  currentImage = imageName;
+  send({'imageSelected' : {
+        'imageName' : currentImage,
+        'outputSettings' : myOutputSettings
+        }});
+  $("#btnGo").addClass('ui-disabled');
+  $("#currentImage").attr("src","img/"+imageName);
+        //send({go:true});
+  //}).addClass('ui-disabled');
+
+}
+
 $(document).ready(function() {
   console.log('document.ready');
 
@@ -100,17 +120,6 @@ $(document).ready(function() {
         send({'go':true});
   }).addClass('ui-disabled');
   
-
- $("#selImage").on("change", function() {
-        //alert(this.value);
-        send({'imageSelected' : {
-          'imageName' : $("#selImage").val(),
-          'outputSettings' : myOutputSettings
-        }});
-        $("#btnGo").addClass('ui-disabled');
-        //send({go:true});
-  //}).addClass('ui-disabled');
-  });
 
   $("#sldWalkingSpeed").on('slidestop', function(){
     //alert("huhuhuhdsuhdusd");
@@ -146,7 +155,7 @@ $(document).ready(function() {
     myOutputSettings.walkingSpeed = $("#sldWalkingSpeed").val();
     myOutputSettings.brightness = $("#sldBrightness").val();
     send({'imageSelected' : {
-      'imageName' : $("#selImage").val(),
+      'imageName' : currentImage,
       'outputSettings' : myOutputSettings
     }});
     $("#btnGo").addClass('ui-disabled');
