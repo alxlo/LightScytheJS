@@ -16,6 +16,13 @@ So the LightScyteJS is more an evolution of an existing concept than a new idea.
 ![example2: some text](https://raw.github.com/alxlo/LightScytheJS/master/docimages/senftenberg2013.jpg)
 photograph by [Martin Voigt](http://martin.weickersdorf.de/)
 
+More Images
+===========
+
+* [Universalist on tumblr](http://universalist.tumblr.com/post/71303664797/meine-besten-lightpainting-bilder-vom-tag-null-des)
+* [Photo Blog of Martin Voigt](http://martin.weickersdorf.de/privat/lightpainting-malen-mit-licht/)
+
+
 Hardware
 --------
 
