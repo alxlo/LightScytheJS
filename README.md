@@ -8,6 +8,8 @@ The basic idea for this tool was developed by The Mechatronics Guy and brought t
 ![example1: ceshire cat](https://raw.github.com/alxlo/LightScytheJS/master/docimages/ceshirecat.jpg)
 photograph by [Martin Voigt](http://martin.weickersdorf.de/)
 
+More [30C3 images on flickriver](http://www.flickriver.com/photos/39737351@N08/tags/lightscythe/), by [Universalist on tumblr](http://universalist.tumblr.com/post/71303664797/meine-besten-lightpainting-bilder-vom-tag-null-des) an on [Martin Voigt's Photo Blog](http://martin.weickersdorf.de/privat/lightpainting-malen-mit-licht/).
+
 So the LightScyteJS is more an evolution of an existing concept than a new idea. It was intended to be an excercise to get accostumed to node.js using the [Cubieboard](http://cubieboard.org/) platform and improved the original in some aspects:
 * Pure node.js makes the code easy to understand and to maintain for people not used to microcontroller platforms.
 * A web interface utilizing [express](https://github.com/visionmedia/express) and [jQueryMobile](http://jquerymobile.com/) provides convenient and fine tuned control of the device in the field.
@@ -15,13 +17,6 @@ So the LightScyteJS is more an evolution of an existing concept than a new idea.
 
 ![example2: some text](https://raw.github.com/alxlo/LightScytheJS/master/docimages/senftenberg2013.jpg)
 photograph by [Martin Voigt](http://martin.weickersdorf.de/)
-
-More Images
-===========
-
-* [Universalist on tumblr](http://universalist.tumblr.com/post/71303664797/meine-besten-lightpainting-bilder-vom-tag-null-des)
-* [Photo Blog of Martin Voigt](http://martin.weickersdorf.de/privat/lightpainting-malen-mit-licht/)
-
 
 Hardware
 --------
